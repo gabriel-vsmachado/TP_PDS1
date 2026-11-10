@@ -40,7 +40,7 @@
  * (-1, 0 ou 1, normalmente). A velocidade e medida em pixels por quadro.
  * O campo oxygen e inicializado, mas ainda nao e atualizado no jogo.
  */
-typedef struct Sub {
+typedef struct {
 	float x, y;
 	int vel;	
 	int dir_x;
@@ -58,7 +58,7 @@ typedef struct Sub {
  * como um circulo verde. O campo foe recebe zero e nao e consultado;
  * dir_x tambem nao e utilizado pela funcao de movimentacao atual.
  */
-typedef struct Diver {
+typedef struct {
 	float x,y;
 	int dir_x;
 	int vel;
