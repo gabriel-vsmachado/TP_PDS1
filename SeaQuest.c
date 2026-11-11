@@ -47,6 +47,7 @@ typedef struct {
 	int dir_y;
 	float oxygen;
 	int diversRescued;
+	int lives;
 	ALLEGRO_COLOR color;
 } Sub;
 
@@ -164,6 +165,7 @@ void initSub(Sub *sub) {
 	sub->dir_y = 0;
 	sub->oxygen = MAX_OXYGEN;
 	sub->diversRescued = 0;
+	sub->lives = 3;
 	sub->color = al_map_rgb(138, 43, 226);
 }
 
@@ -356,7 +358,7 @@ bool checkCollisionSubDiver(Sub s, Diver d) {
 	else if(closestx > s.x + SUB_WIDTH){
 		closestx = s.x + SUB_WIDTH;
 	}
-	//TRava y dentro dos limites verticais do submarino
+	//Trava y dentro dos limites verticais do submarino
 	if(closesty < s.y){
 		closesty = s.y;
 	}
@@ -373,7 +375,19 @@ bool checkCollisionSubDiver(Sub s, Diver d) {
 	return sqrt(distSquared) < 20.0;
 }
 
+bool checkCollisionSubFoe(Sub sub, Foe foe) {
 
+	//Definição das medidas do submarino para a colisão entre o submarino e o torpedo inimigo
+	float subWidth = 160;
+	float subHeight = 40;
+
+	//Verifica se há sobreposição entre o submarino e o torpedo inimigo
+	if(sub.x < foe.x + FOE_WIDTH && sub.x + subWidth > foe.x &&
+	   sub.y < foe.y + FOE_HEIGHT && sub.y + subHeight > foe.y) {
+		return true;
+	}
+	return false;
+}
 
 
 
@@ -491,18 +505,15 @@ int main(int argc, char **argv){
 	Sub sub;
 	initSub(&sub);
 
-	Foe foe;
-	initFoe(&foe);
-
 	Diver diver;
 	initDiver(&diver);
 
+	Foe foes[12];
+	for(int i=0; i<12; i++) {
+		initFoe(&foes[i]);
+	}
 
-
-
-
-
-	// Inicia a emissao de eventos periodicos pelo temporizador.
+    // Inicia a emissao de eventos periodicos pelo temporizador.
 	al_start_timer(timer);
 	
 	int playing = 1;
@@ -523,7 +534,9 @@ int main(int argc, char **argv){
 
 			updateSub(&sub);
 			updateDiver(&diver);
-			updateFoe(&foe);
+			for(int i=0; i<12; i++) {
+				updateFoe(&foes[i]);
+			}
 
 			if(checkCollisionSubDiver(sub, diver)){
 				sub.diversRescued++;
@@ -532,16 +545,28 @@ int main(int argc, char **argv){
 				diver.x = -20;
 			}
 
+			for(int i=0; i<12; i++) {
+				if(checkCollisionSubFoe(sub, foes[i])) {
+				sub.lives--;
+				printf("\nSubmarino atingido por um torpedo inimigo! Vidas restantes: %d", sub.lives);
+				
+				initFoe(&foes[i]);
 
-
+					if(sub.lives <= 0) {
+					printf("\nGame Over! Final Score: %d", SCORE);
+					playing = false;
+					}
+				}
+			}
 
 
 
 			drawSub(sub);
 			drawDiver (diver);
-			drawFoe(foe);
-
-
+			
+			for(int i=0; i<12; i++) {
+				drawFoe(foes[i]);
+			}
 
 
 			// Apresenta na janela o quadro que acabou de ser desenhado.
