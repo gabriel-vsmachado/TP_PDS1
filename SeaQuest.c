@@ -234,7 +234,7 @@ void initFoe(Foe *foe) {
 	}
 
 	//Sorteia a pprofundidade inicial do torpedo inimigo
-	foe->y = SEA_LEVEL + (rand() % (int)(SCREEN_H - SEA_LEVEL - 50));
+	foe->y = SEA_LEVEL + 50 + (rand() % (int)(SCREEN_H - SEA_LEVEL - 100));
 
 	//Define a cor vermelha do torpedo inimigo
 	foe->color = al_map_rgb(255, 0, 0);
@@ -245,6 +245,15 @@ void updateFoe(Foe *foe) {
 
 	//Atualiza a posição horizontal do torpedo inimigo (eixo x)
 	foe->x += foe->dir_x * foe->vel;
+
+	//Reposiciona o torpedo que sair da tela à direita com novos valores
+	if(foe->dir_x > 0 && foe->x > SCREEN_W) {
+		initFoe(foe);
+	}
+	//Reposiciona o torpedo que sair da tela à esquerda com novos valores
+	if(foe->dir_x < 0 && foe->x < 0) {
+		initFoe(foe);
+	}
 }
 
 //Desenha o torpedo inimigo 
