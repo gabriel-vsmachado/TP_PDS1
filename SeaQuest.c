@@ -305,10 +305,17 @@ void drawDiver(Diver diver) {
  */
 void updateDiver(Diver *diver) {
 
+	//Atualiza a posição horizontal com base na direção e velocidade do objeto
+	diver->x += diver->dir_x *diver->vel;
 
-	diver->x += diver->vel;
-
-
+	//Loop para reposicionar divers que sairem da tela à direita
+	if(diver->dir_x > 0 && diver->x > SCREEN_W) {
+		diver->x = -20;
+	}
+	//Loop para reposicionar divers que sairem da tela à esquerda
+	if(diver->dir_x < 0 && diver->x < 0) {
+		diver->x = SCREEN_W + 20;
+	}
 }
 
 
