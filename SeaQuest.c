@@ -254,6 +254,27 @@ void updateSub(Sub *s) {
 	if(s->y + SUB_HEIGHT > SCREEN_H) {
 		s->y = SCREEN_H - SUB_HEIGHT;
 	}
+
+	//Mecânica de oxigênio
+	
+	//Verifica se o submarino está abaixo do nível do mar e consome oxigênio, deixando o valor mínimo em 0
+	//Pela taxa de atualização de 100FPS, o oxigênio completo consome em 40 segundos
+	if(s->y > SEA_LEVEL) {
+		s->oxygen -= 0.003;
+
+		if(s->oxygen < 0) {
+			s->oxygen = 0;
+		}
+	}
+	//Se o submarino estiver acima do nível do mar, reabastece o oxigênio (máximo em MAX_OXYGEN)
+	//Pela taxa de atualização de 100FPS, o oxigênio completo reabastece em 6 segundos
+	else {
+		s->oxygen += 0.02;
+	}
+	if(s->oxygen > MAX_OXYGEN) {
+		s->oxygen = MAX_OXYGEN;
+	}
+	printf("\nOxigênio: %.2f", s->oxygen);
 }
 
 
