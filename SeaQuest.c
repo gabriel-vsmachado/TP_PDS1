@@ -64,7 +64,6 @@ typedef struct {
 	float x,y;
 	int dir_x;
 	int vel;
-	int foe; // Indicador reservado para diferenciar mergulhadores e inimigos.
 	ALLEGRO_COLOR color;
 } Diver;
 
@@ -176,7 +175,7 @@ void initSub(Sub *sub) {
  * @note Funcao auxiliar disponivel, mas nao chamada no laco principal.
  */
 void printDiver(Diver d, int id) {
-	printf("\n(%d) %.1f %.1f %d %d %d", id, d.x, d.y, d.dir_x, d.vel, d.foe);
+	printf("\n(%d) %.1f %.1f %d %d", id, d.x, d.y, d.dir_x, d.vel);
 }
 
 
@@ -189,14 +188,27 @@ void printDiver(Diver d, int id) {
  * caracteristicas e nao distribui objetos por diferentes profundidades.
  */
 void initDiver(Diver *diver) {
-	diver->dir_x = 1;
-	diver->x = 0;
-	diver->y = SCREEN_H/2;
-	diver->vel = 2;
-	diver->foe = 0;
-	diver->color = al_map_rgb(0,255,0);
-}
+	
+	//Soreteia a direção horizontal do diver (entre -1 e 1)
+	diver->dir_x = ((rand() % 2) * 2) - 1;
+	
+	//Sorteia a velocidade do diver (entre 1 e 3 pixels por quadro)
+	diver->vel = (rand() % 3) + 1;
+	
+	//Define a cor do diver como branco
+	diver->color = al_map_rgb(255,255,255);
 
+	//Define o posicionamento horizontal inicial fora da tela
+	if(diver->dir_x > 0) {
+		diver->x = -100 - (rand() % 300);
+	} 
+	else {
+		diver->x = SCREEN_W + 100 + (rand() % 300);
+	}
+
+	//Sorteia a profundidade do diver
+	diver->y = SEA_LEVEL + 50 + (rand() % (int)(SCREEN_H - SEA_LEVEL - 100)); 
+}
 
 // @brief Desenha o submarino como um retangulo preenchido arredondado
 //As dimensoes sao definidas pelas constantes SUB_WIDTH e SUB_HEIGHT
@@ -258,7 +270,9 @@ void updateFoe(Foe *foe) {
 
 //Desenha o torpedo inimigo 
 void drawFoe(Foe foe) {
+
 	al_draw_filled_rectangle(foe.x, foe.y - FOE_HEIGHT/2, foe.x + FOE_WIDTH, foe.y + FOE_HEIGHT/2, foe.color);
+
 }
 
 //Atualiza a posição do submarino de acordo com o teclado
@@ -514,8 +528,10 @@ int main(int argc, char **argv){
 	Sub sub;
 	initSub(&sub);
 
-	Diver diver;
-	initDiver(&diver);
+	Diver divers[6];
+	for(int i=0; i<6; i++) {
+		initDiver(&divers[i]);
+	}
 
 	Foe foes[12];
 	for(int i=0; i<12; i++) {
@@ -542,41 +558,46 @@ int main(int argc, char **argv){
 
 
 			updateSub(&sub);
-			updateDiver(&diver);
+			for(int i=0; i<6; i++){
+				updateDiver(&divers[i]);
+			}
 			for(int i=0; i<12; i++) {
 				updateFoe(&foes[i]);
 			}
 
-			if(checkCollisionSubDiver(sub, diver)){
-				sub.diversRescued++;
-				SCORE += 10;
-				printf("\nMergulhador resgatado! Pontos: %d", SCORE);
-				diver.x = -20;
+			for(int i=0; i<6; i++){
+				if(checkCollisionSubDiver(sub, divers[i])){
+					sub.diversRescued++;
+					SCORE += 10;
+					printf("\nMergulhador resgatado! Pontos: %d", SCORE);
+					divers[i].x = -20;
+					initDiver(&divers[i]);
+				}
 			}
-
+				
 			for(int i=0; i<12; i++) {
 				if(checkCollisionSubFoe(sub, foes[i])) {
-				sub.lives--;
-				printf("\nSubmarino atingido por um torpedo inimigo! Vidas restantes: %d", sub.lives);
+					sub.lives--;
+					printf("\nSubmarino atingido por um torpedo inimigo! Vidas restantes: %d", sub.lives);
 				
-				initFoe(&foes[i]);
+					initFoe(&foes[i]);
 
 					if(sub.lives <= 0) {
-					printf("\nGame Over! Final Score: %d", SCORE);
-					playing = false;
+						printf("\nGame Over! Final Score: %d", SCORE);
+						playing = false;
 					}
 				}
 			}
 
 
-
 			drawSub(sub);
-			drawDiver (diver);
+			for(int i=0; i<6; i++) {
+				drawDiver(divers[i]);
+			}
 			
 			for(int i=0; i<12; i++) {
 				drawFoe(foes[i]);
 			}
-
 
 			// Apresenta na janela o quadro que acabou de ser desenhado.
 			al_flip_display();
