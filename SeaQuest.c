@@ -154,14 +154,7 @@ void drawScenario(Sub sub) {
 
 }
 
-
-/**
- * @brief Inicializa posicao, velocidade, direcoes, oxigenio e cor.
- * @param sub Ponteiro para o submarino a ser inicializado.
- *
- * O submarino comeca no limite da faixa superior, com velocidade
- * SUB_VEL_ABOVE, sem movimento e com o reservatorio cheio.
- */
+//Inicializao submarino com posição, velocidade, direção e oxigênio iniciais
 void initSub(Sub *sub) {
 	sub->x = 0;
 	sub->y = SEA_LEVEL - SUB_HEIGHT/2;
@@ -171,9 +164,6 @@ void initSub(Sub *sub) {
 	sub->oxygen = MAX_OXYGEN;
 	sub->color = al_map_rgb(230, 230, 0);
 }
-
-
-
 
 /**
  * @brief Imprime os atributos de um objeto para depuracao.
@@ -295,14 +285,6 @@ void drawDiver(Diver diver) {
 
 }
 
-
-/**
- * @brief Desloca um unico objeto horizontalmente para a direita.
- * @param diver Ponteiro para o objeto cuja posicao sera atualizada.
- *
- * Acrescenta vel a coordenada x em cada quadro. Ainda nao considera
- * dir_x, nao testa os limites da tela e nao reposiciona o objeto.
- */
 void updateDiver(Diver *diver) {
 
 	//Atualiza a posição horizontal com base na direção e velocidade do objeto
@@ -318,6 +300,34 @@ void updateDiver(Diver *diver) {
 	}
 }
 
+bool checkCollisionSubDiver(Sub s, Diver d) {
+
+	//Variáveis temporárias que armazenam a posição mais próxima do diver ao submarino
+	float closestx = d.x;
+	float closesty = d.y;
+	//Trava x dentro dos limites horizontais do submarino
+	if(closestx < s.x){
+		closestx = s.x;
+	}
+	else if(closestx > s.x + SUB_WIDTH){
+		closestx = s.x + SUB_WIDTH;
+	}
+	//TRava y dentro dos limites verticais do submarino
+	if(closesty < s.y){
+		closesty = s.y;
+	}
+	else if(closesty > s.y + SUB_HEIGHT){
+		closesty = s.y + SUB_HEIGHT;
+	}
+
+	//Usando Pitágoras, calcula a distância entre o ponto mais próximo entre o submarino e o centro do diver
+	float distx = d.x - closestx;
+	float disty = d.y - closesty;
+	float distSquared= (distx * distx) + (disty * disty);
+
+	//Retorna verdadeiro ou falso caso a distância seja menor que o raio do diver de 10 pixels)
+	return sqrt(distSquared) < 10.0;
+}
 
 
 
@@ -469,7 +479,11 @@ int main(int argc, char **argv){
 			updateSub(&sub);
 			updateDiver(&diver);
 
-
+			if(checkCollisionSubDiver(sub, diver)){
+				SCORE += 10;
+				printf("\nMergulhador resgatado! Pontos: %d", SCORE);
+				diver.x = -20;
+			}
 
 
 
