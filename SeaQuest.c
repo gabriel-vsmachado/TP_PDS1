@@ -229,17 +229,31 @@ void drawSub(Sub sub) {
  */
 void updateSub(Sub *s) {
 
-
-
-
+	//Atualiza a posição horizontal do submarino (eixo X)
 	s->x += s->dir_x * s->vel;
 
-
+	//Atualiza a posição vertical do submarino (eixo Y)
 	s->y += s->dir_y * s->vel;
 
+	//Restringe o limite da tela à esquerda
+	if(s->x < 0) {
+		s->x = 0;
+	}
 
+	//Restringe o limite da tela à direita
+	if(s->x > SCREEN_W - SUB_WIDTH) {
+		s->x = SCREEN_W - SUB_WIDTH;
+	}
 
+	//Restringe o limite superior da tela (superfície do mar)
+	if(s->y < SEA_LEVEL - SUB_HEIGHT/2) {
+		s->	y = SEA_LEVEL - SUB_HEIGHT/2;
+	}
 
+	//Restringe o limite inferior da tela
+	if(s->y + SUB_HEIGHT > SCREEN_H) {
+		s->y = SCREEN_H - SUB_HEIGHT;
+	}
 }
 
 
