@@ -46,6 +46,7 @@ typedef struct {
 	int dir_x;
 	int dir_y;
 	float oxygen;
+	int diversRescued;
 	ALLEGRO_COLOR color;
 } Sub;
 
@@ -77,25 +78,25 @@ const float FPS = 100;
 /* Dimensoes da janela, tamanho do submarino e velocidades previstas.
  * Na versao inicial, initSub utiliza SUB_VEL_ABOVE; SUB_VEL_SEA ainda
  * nao e utilizado para alternar a velocidade ao mergulhar. */
-const int SCREEN_W = 960;
-const int SCREEN_H = 540;
-const int SUB_HEIGHT = 20;
-const int SUB_WIDTH = 80;
-const int SUB_VEL_ABOVE = 5;
-const int SUB_VEL_SEA = 1;
+const int SCREEN_W = 1920;
+const int SCREEN_H = 1080;
+const int SUB_HEIGHT = 40;
+const int SUB_WIDTH = 160;
+const int SUB_VEL_ABOVE = 10;
+const int SUB_VEL_SEA = 2;
 
 
 /* Constantes reservadas para a implementacao dos objetos e do oxigenio.
  * O programa inicial cria somente um Diver, sem utilizar NUM_DIVERS. */
 #define NUM_DIVERS 12
-const int DIVER_WIDTH = 8;
-const int DIVER_HEIGHT = 3;
+const int DIVER_WIDTH = 16;
+const int DIVER_HEIGHT = 6;
 const int MAX_OXYGEN = 12;
 
 
-/* Dimensoes previstas para inimigos; nao utilizadas nesta versao. */
+//Dimensoes previstas para inimigos
 const int FOE_WIDTH = 32;
-const int FOE_HEIGTH = 14;
+const int FOE_HEIGHT = 14;
 
 
 /* Altura da faixa superior da tela e pontuacao corrente.
@@ -162,7 +163,8 @@ void initSub(Sub *sub) {
 	sub->dir_x = 0;
 	sub->dir_y = 0;
 	sub->oxygen = MAX_OXYGEN;
-	sub->color = al_map_rgb(230, 230, 0);
+	sub->diversRescued = 0;
+	sub->color = al_map_rgb(138, 43, 226);
 }
 
 /**
@@ -180,7 +182,7 @@ void printDiver(Diver d, int id) {
  * @brief Inicializa um unico objeto circular verde.
  * @param diver Ponteiro para o objeto a ser inicializado.
  *
- * Define a posicao inicial em (0, SCREEN_H/2), velocidade 1,
+ * Define a posicao inicial em (0, SCREEN_H/2), velocidade 2,
  * dir_x igual a 1 e foe igual a 0. Nao cria um vetor, nao sorteia
  * caracteristicas e nao distribui objetos por diferentes profundidades.
  */
@@ -188,18 +190,14 @@ void initDiver(Diver *diver) {
 	diver->dir_x = 1;
 	diver->x = 0;
 	diver->y = SCREEN_H/2;
-	diver->vel = 1;
+	diver->vel = 2;
 	diver->foe = 0;
 	diver->color = al_map_rgb(0,255,0);
 }
 
 
-/**
- * @brief Desenha o submarino como um retangulo preenchido arredondado.
- * @param sub Estado utilizado para obter a posicao e a cor do desenho.
- *
- * As dimensoes sao definidas pelas constantes SUB_WIDTH e SUB_HEIGHT.
- */
+// @brief Desenha o submarino como um retangulo preenchido arredondado
+//As dimensoes sao definidas pelas constantes SUB_WIDTH e SUB_HEIGHT
 void drawSub(Sub sub) {
 
 
@@ -208,15 +206,53 @@ void drawSub(Sub sub) {
 
 }
 
+//Criação de uma estrutura para representar torpedos inimigos com posição, velocidade, direção e cor
+typedef struct {
+	float x, y;
+	int vel;
+	int dir_x;
+	ALLEGRO_COLOR color;
+}  Foe;
 
-/**
- * @brief Atualiza a posicao do submarino de acordo com o teclado.
- * @param s Ponteiro para o submarino a ser atualizado.
- *
- * A cada quadro, soma dir_x * vel a x e dir_y * vel a y.
- * Nesta versao, nao limita a posicao a tela, nao altera a velocidade
- * por profundidade e nao consome nem reabastece oxigenio.
- */
+//Inicializa um torpedo inimigo com posição, velocidade e direção iniciais
+void initFoe(Foe *foe) {
+	
+	//Sorteia a direção horizontal do torpedo inimigo (entre -1 e 1)
+	foe->dir_x = ((rand() % 2) * 2) - 1;
+
+	//Sorteia a velocidade do torpedo inimigo (entre 3 e 6 pixels por quadro)
+	foe->vel = (rand() % 4) + 3;
+
+	//Posicionamento horizontal inicial do torpedo inimigo fora da tela
+	if(foe->dir_x > 0) {
+		foe->x = -150 - (rand() % 200);
+	} 
+	else {
+		foe->x = SCREEN_W + 150 + (rand() % 200);
+	}
+
+	//Sorteia a pprofundidade inicial do torpedo inimigo
+	foe->y = SEA_LEVEL + (rand() % (int)(SCREEN_H - SEA_LEVEL - 50));
+
+	//Define a cor vermelha do torpedo inimigo
+	foe->color = al_map_rgb(255, 0, 0);
+}
+
+//Atualizações do torpedo inimigo
+void updateFoe(Foe *foe) {
+
+	//Atualiza a posição horizontal do torpedo inimigo (eixo x)
+	foe->x += foe->dir_x * foe->vel;
+}
+
+//Desenha o torpedo inimigo 
+void drawFoe(Foe foe) {
+	al_draw_filled_rectangle(foe.x, foe.y - FOE_HEIGHT/2, foe.x + FOE_WIDTH, foe.y + FOE_HEIGHT/2, foe.color);
+}
+
+//Atualiza a posição do submarino de acordo com o teclado
+//A cada quadro, soma dir_x * vel a x e dir_y * vel a y.
+//nao altera a velocidade por profundidade
 void updateSub(Sub *s) {
 
 	//Atualiza a posição horizontal do submarino (eixo X)
@@ -245,10 +281,10 @@ void updateSub(Sub *s) {
 		s->y = SCREEN_H - SUB_HEIGHT;
 	}
 
-	//Mecânica de oxigênio
+	//Mecânica de oxigênio:
 	
 	//Verifica se o submarino está abaixo do nível do mar e consome oxigênio, deixando o valor mínimo em 0
-	//Pela taxa de atualização de 100FPS, o oxigênio completo consome em 40 segundos
+	//Pela taxa de atualização de 100fps, o oxigênio completo consome em 40 segundos
 	if(s->y > SEA_LEVEL) {
 		s->oxygen -= 0.003;
 
@@ -257,9 +293,17 @@ void updateSub(Sub *s) {
 		}
 	}
 	//Se o submarino estiver acima do nível do mar, reabastece o oxigênio (máximo em MAX_OXYGEN)
-	//Pela taxa de atualização de 100FPS, o oxigênio completo reabastece em 6 segundos
+	//Pela taxa de atualização de 100fps, o oxigênio completo reabastece em 6 segundos
 	else {
 		s->oxygen += 0.02;
+
+		//Se houver mergulhadores resgatados, adiciona pontos por cada resgate
+		if(s->diversRescued > 0) {
+			SCORE += s->diversRescued * 100;
+			printf("\nMergulhadores entregues na superfície! Placar atual: %d", SCORE);
+			//Esvazia o submarino 
+			s->diversRescued = 0;
+		}
 	}
 	if(s->oxygen > MAX_OXYGEN) {
 		s->oxygen = MAX_OXYGEN;
@@ -274,13 +318,13 @@ void updateSub(Sub *s) {
  * @brief Desenha o objeto como um circulo preenchido.
  * @param diver Objeto que fornece centro e cor do circulo.
  *
- * O raio do circulo e fixo em 10 pixels; DIVER_WIDTH e
+ * O raio do circulo e fixo em 20 pixels; DIVER_WIDTH e
  * DIVER_HEIGHT ainda nao sao utilizados no desenho.
  */
 void drawDiver(Diver diver) {
 
 
-	al_draw_filled_circle(diver.x, diver.y, 10, diver.color);
+	al_draw_filled_circle(diver.x, diver.y, 20, diver.color);
 
 
 }
@@ -325,8 +369,8 @@ bool checkCollisionSubDiver(Sub s, Diver d) {
 	float disty = d.y - closesty;
 	float distSquared= (distx * distx) + (disty * disty);
 
-	//Retorna verdadeiro ou falso caso a distância seja menor que o raio do diver de 10 pixels)
-	return sqrt(distSquared) < 10.0;
+	//Retorna verdadeiro ou falso caso a distância seja menor que o raio do diver de 20 pixels)
+	return sqrt(distSquared) < 20.0;
 }
 
 
@@ -444,10 +488,11 @@ int main(int argc, char **argv){
 
 	initGlobalVars();
 
-
 	Sub sub;
 	initSub(&sub);
 
+	Foe foe;
+	initFoe(&foe);
 
 	Diver diver;
 	initDiver(&diver);
@@ -478,8 +523,10 @@ int main(int argc, char **argv){
 
 			updateSub(&sub);
 			updateDiver(&diver);
+			updateFoe(&foe);
 
 			if(checkCollisionSubDiver(sub, diver)){
+				sub.diversRescued++;
 				SCORE += 10;
 				printf("\nMergulhador resgatado! Pontos: %d", SCORE);
 				diver.x = -20;
@@ -492,6 +539,7 @@ int main(int argc, char **argv){
 
 			drawSub(sub);
 			drawDiver (diver);
+			drawFoe(foe);
 
 
 
