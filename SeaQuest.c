@@ -295,16 +295,36 @@ void drawFoe(Foe foe) {
 
 }
 
+//Mecânica de velocidade com base na profundidade em que o submarino está
+float updateSubVel(Sub s) {
+	float depthMax = SCREEN_H -SEA_LEVEL;
+	float depthCurrent = s.y - SEA_LEVEL;
+
+	if(depthCurrent < 0) {
+		depthCurrent = 0;
+	}
+
+	//Fator de variação da superfície (1.0) ao fundo (0.5)
+	float velFactor = 0.8 - (0.7 * (depthCurrent / depthMax));
+
+	return SUB_VEL_ABOVE * velFactor;
+}
+
 //Atualiza a posição do submarino de acordo com o teclado
 //A cada quadro, soma dir_x * vel a x e dir_y * vel a y.
 //nao altera a velocidade por profundidade
 void updateSub(Sub *s) {
 
+	//Mecânica de velocidade com base na profundidade em quem o submarino está:
+
+	//Obtém a velocidade atual com base na profundidade
+	float velCurrent = updateSubVel(*s);
+
 	//Atualiza a posição horizontal do submarino (eixo X)
-	s->x += s->dir_x * s->vel;
+	s->x += s->dir_x * velCurrent;
 
 	//Atualiza a posição vertical do submarino (eixo Y)
-	s->y += s->dir_y * s->vel;
+	s->y += s->dir_y * velCurrent;
 
 	//Restringe o limite da tela à esquerda
 	if(s->x < 0) {
@@ -356,9 +376,6 @@ void updateSub(Sub *s) {
 	printf("\nOxigênio: %.2f", s->oxygen);
 }
 
-
-
-
 /**
  * @brief Desenha o objeto como um circulo preenchido.
  * @param diver Objeto que fornece centro e cor do circulo.
@@ -368,9 +385,7 @@ void updateSub(Sub *s) {
  */
 void drawDiver(Diver diver) {
 
-
 	al_draw_filled_circle(diver.x, diver.y, 20, diver.color);
-
 
 }
 
