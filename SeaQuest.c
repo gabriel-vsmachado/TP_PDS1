@@ -141,7 +141,7 @@ void drawOxygenBar(Sub sub) {
 	float widthFilled = width * oxygenFilled;
 
 	//Desenha o fundo cinza da barra vazia
-	al_draw_filled_rectangle(x, y, x + width, y + height, al_map_rgb(128, 128, 128));
+	al_draw_filled_rectangle(x, y, x + width, y + height, al_map_rgb(60, 60, 60));
 
 	//Desenha a parte preenchida do oxigênio por cima
 	ALLEGRO_COLOR oxygenColor;
@@ -156,19 +156,35 @@ void drawOxygenBar(Sub sub) {
 
 //Desenha a quantidade de vidas restante como losangos vermelhos na tela
 void drawLives(Sub sub) {
-	float startx = 150;
-	float y = 25;
+	
+	float oxygenBarx = SCREEN_W - 400 - 20;
+	
+	float startx = oxygenBarx - 130;
+	float y = 35;
 	float width = 20;
 	float height = 30;
 
-	for(int i=0; i<sub.lives; i++) {
+	for(int i=0; i<3; i++) {
 		float cx = startx + (i * 35);
 		float cy = y;
 
+		//Muda a cor dos losangos com base na perda de vidas do player
+		int r, g, b;
+		if(i < sub.lives) {
+			r = 255;
+			g = 0;
+			b = 0;
+		}
+		else {
+			r = 60;
+			g = 60;
+			b = 60;
+		}
+
 		//Desenha a parte de cima dos losangos
-		al_draw_filled_triangle(cx, cy - height/2, cx - width/2, cy, cx + width/2, cy, al_map_rgb(255, 0, 0));
+		al_draw_filled_triangle(cx, cy - height/2, cx - width/2, cy, cx + width/2, cy, al_map_rgb(r, g, b));
 		//Desenha a parte inferior dos losangos
-		al_draw_filled_triangle(cx, cy + height/2, cx - width/2, cy, cx + width/2, cy, al_map_rgb(255, 0, 0));		
+		al_draw_filled_triangle(cx, cy + height/2, cx - width/2, cy, cx + width/2, cy, al_map_rgb(r, g, b));		
 	}
 }
 
@@ -186,9 +202,9 @@ void drawScenario(Sub sub) {
    
    	al_draw_filled_rectangle(0, 0, SCREEN_W, SEA_LEVEL, SKY_COLOR);
 
-	char text_score[4];
-   	sprintf(text_score, "%d", SCORE);
-   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_score); 
+	char text_info[64];
+   	sprintf(text_info, "Current Score: %d     Divers on board: %d", SCORE, sub.diversRescued);
+   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_info); 
 	
 	drawLives(sub);
 	
