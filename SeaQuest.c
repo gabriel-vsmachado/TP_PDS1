@@ -344,7 +344,7 @@ void updateSub(Sub *s) {
 
 		//Se houver mergulhadores resgatados, adiciona pontos por cada resgate
 		if(s->diversRescued > 0) {
-			SCORE += s->diversRescued * 100;
+			SCORE += s->diversRescued * 10;
 			printf("\nMergulhadores entregues na superfície! Placar atual: %d", SCORE);
 			//Esvazia o submarino 
 			s->diversRescued = 0;
@@ -588,7 +588,7 @@ int main(int argc, char **argv){
 			for(int i=0; i<6; i++){
 				if(checkCollisionSubDiver(sub, divers[i])){
 					sub.diversRescued++;
-					SCORE += 10;
+					SCORE += 1;
 					printf("\nMergulhador resgatado! Pontos: %d", SCORE);
 					divers[i].x = -20;
 					initDiver(&divers[i]);
