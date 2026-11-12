@@ -154,6 +154,24 @@ void drawOxygenBar(Sub sub) {
 	al_draw_filled_rectangle(x, y, x + widthFilled, y + height, oxygenColor);	
 }
 
+//Desenha a quantidade de vidas restante como losangos vermelhos na tela
+void drawLives(Sub sub) {
+	float startx = 150;
+	float y = 25;
+	float width = 20;
+	float height = 30;
+
+	for(int i=0; i<sub.lives; i++) {
+		float cx = startx + (i * 35);
+		float cy = y;
+
+		//Desenha a parte de cima dos losangos
+		al_draw_filled_triangle(cx, cy - height/2, cx - width/2, cy, cx + width/2, cy, al_map_rgb(255, 0, 0));
+		//Desenha a parte inferior dos losangos
+		al_draw_filled_triangle(cx, cy + height/2, cx - width/2, cy, cx + width/2, cy, al_map_rgb(255, 0, 0));		
+	}
+}
+
 /**
  * @brief Desenha o fundo azul, a faixa superior cinza e a pontuacao.
  * @param sub Estado do submarino; parametro ainda nao utilizado aqui.
@@ -170,7 +188,9 @@ void drawScenario(Sub sub) {
 
 	char text_score[4];
    	sprintf(text_score, "%d", SCORE);
-   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_score);  
+   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_score); 
+	
+	drawLives(sub);
 	
 	drawOxygenBar(sub);
 }
