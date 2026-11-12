@@ -70,8 +70,8 @@ typedef struct {
 
 
 
-/* Frequencia de atualizacao do jogo, em quadros por segundo.
- * As velocidades das estruturas sao medidas em pixels por quadro. */
+//Frequencia de atualizacao do jogo, em quadros por segundo
+//As velocidades das estruturas sao medidas em pixels por quadro
 const float FPS = 100;
 
 
@@ -129,8 +129,30 @@ void initGlobalVars() {
 	size_32 = al_load_font("arial.ttf", 32, 1);   
 }
 
+void drawOxygenBar(Sub sub) {
 
+	//Delimita as dimensões e posicionamento da barra na tela
+	float width = 400;
+	float height = 40;
+	float x = SCREEN_W - width - 20;
+	float y = 15;
 
+	float oxygenFilled = sub.oxygen / MAX_OXYGEN;
+	float widthFilled = width * oxygenFilled;
+
+	//Desenha o fundo cinza da barra vazia
+	al_draw_filled_rectangle(x, y, x + width, y + height, al_map_rgb(128, 128, 128));
+
+	//Desenha a parte preenchida do oxigênio por cima
+	ALLEGRO_COLOR oxygenColor;
+	if(sub.oxygen <= 3) {
+		oxygenColor = al_map_rgb(255, 0, 0);	
+	}
+	else {
+		oxygenColor = al_map_rgb(255, 255, 255);
+	}	
+	al_draw_filled_rectangle(x, y, x + widthFilled, y + height, oxygenColor);	
+}
 
 /**
  * @brief Desenha o fundo azul, a faixa superior cinza e a pontuacao.
@@ -142,17 +164,15 @@ void initGlobalVars() {
  */
 void drawScenario(Sub sub) {
 
-
-   al_clear_to_color(SEA_COLOR);   
+	al_clear_to_color(SEA_COLOR);   
    
-   al_draw_filled_rectangle(0, 0, SCREEN_W, SEA_LEVEL, al_map_rgb(70,70,70)); 
+   	al_draw_filled_rectangle(0, 0, SCREEN_W, SEA_LEVEL, al_map_rgb(70,70,70)); 
 
-
-   char text_score[4];
-   sprintf(text_score, "%d", SCORE);
-   al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_score);   
-
-
+	char text_score[4];
+   	sprintf(text_score, "%d", SCORE);
+   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_score);  
+	
+	drawOxygenBar(sub);
 }
 
 //Inicializao submarino com posição, velocidade, direção e oxigênio iniciais
@@ -589,6 +609,10 @@ int main(int argc, char **argv){
 				}
 			}
 
+			if(sub.oxygen <= 0) {
+				printf("\nGame Over! O oxigênio acabou! Final Score: %d", SCORE);
+				playing = false;
+			}
 
 			drawSub(sub);
 			for(int i=0; i<6; i++) {
