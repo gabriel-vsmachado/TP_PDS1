@@ -124,8 +124,8 @@ float MAX_DIST_COLLISION_FOE;
  */
 void initGlobalVars() {
 	SEA_LEVEL = SCREEN_H/6;
-	SEA_COLOR = al_map_rgb(0,0,155);
-	SKY_COLOR = al_map_rgb(10,10,10);
+	SEA_COLOR = al_map_rgb(0, 0, 155);
+	SKY_COLOR = al_map_rgb(70, 130, 180);
 	size_32 = al_load_font("arial.ttf", 32, 1);   
 }
 
@@ -166,7 +166,7 @@ void drawScenario(Sub sub) {
 
 	al_clear_to_color(SEA_COLOR);   
    
-   	al_draw_filled_rectangle(0, 0, SCREEN_W, SEA_LEVEL, al_map_rgb(70,70,70)); 
+   	al_draw_filled_rectangle(0, 0, SCREEN_W, SEA_LEVEL, SKY_COLOR);
 
 	char text_score[4];
    	sprintf(text_score, "%d", SCORE);
