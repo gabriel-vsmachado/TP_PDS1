@@ -78,25 +78,25 @@ const float FPS = 100;
 /* Dimensoes da janela, tamanho do submarino e velocidades previstas.
  * Na versao inicial, initSub utiliza SUB_VEL_ABOVE; SUB_VEL_SEA ainda
  * nao e utilizado para alternar a velocidade ao mergulhar. */
-const int SCREEN_W = 1920;
-const int SCREEN_H = 1080;
-const int SUB_HEIGHT = 40;
-const int SUB_WIDTH = 160;
-const int SUB_VEL_ABOVE = 10;
+const int SCREEN_W = 960;
+const int SCREEN_H = 540;
+const int SUB_HEIGHT = 20;
+const int SUB_WIDTH = 80;
+const int SUB_VEL_ABOVE = 5;
 const int SUB_VEL_SEA = 2;
 
 
 /* Constantes reservadas para a implementacao dos objetos e do oxigenio.
  * O programa inicial cria somente um Diver, sem utilizar NUM_DIVERS. */
 #define NUM_DIVERS 12
-const int DIVER_WIDTH = 16;
-const int DIVER_HEIGHT = 6;
+const int DIVER_WIDTH = 8;
+const int DIVER_HEIGHT = 3;
 const int MAX_OXYGEN = 12;
 
 
 //Dimensoes previstas para inimigos
-const int FOE_WIDTH = 32;
-const int FOE_HEIGHT = 14;
+const int FOE_WIDTH = 16;
+const int FOE_HEIGHT = 7;
 
 
 /* Altura da faixa superior da tela e pontuacao corrente.
@@ -126,16 +126,16 @@ void initGlobalVars() {
 	SEA_LEVEL = SCREEN_H/6;
 	SEA_COLOR = al_map_rgb(0, 0, 155);
 	SKY_COLOR = al_map_rgb(70, 130, 180);
-	size_32 = al_load_font("arial.ttf", 32, 1);   
+	size_32 = al_load_font("arial.ttf", 16, 1);   
 }
 
 void drawOxygenBar(Sub sub) {
 
 	//Delimita as dimensões e posicionamento da barra na tela
-	float width = 400;
-	float height = 40;
-	float x = SCREEN_W - width - 20;
-	float y = 15;
+	float width = 200;
+	float height = 20;
+	float x = SCREEN_W - width - 10;
+	float y = 8;
 
 	float oxygenFilled = sub.oxygen / MAX_OXYGEN;
 	float widthFilled = width * oxygenFilled;
@@ -157,15 +157,15 @@ void drawOxygenBar(Sub sub) {
 //Desenha a quantidade de vidas restante como losangos vermelhos na tela
 void drawLives(Sub sub) {
 	
-	float oxygenBarx = SCREEN_W - 400 - 20;
+	float oxygenBarx = SCREEN_W - 200 - 10;
 	
-	float startx = oxygenBarx - 130;
-	float y = 35;
-	float width = 20;
-	float height = 30;
+	float startx = oxygenBarx - 65;
+	float y = 18;
+	float width = 10;
+	float height = 15;
 
 	for(int i=0; i<3; i++) {
-		float cx = startx + (i * 35);
+		float cx = startx + (i * 18);
 		float cy = y;
 
 		//Muda a cor dos losangos com base na perda de vidas do player
@@ -204,7 +204,7 @@ void drawScenario(Sub sub) {
 
 	char text_info[64];
    	sprintf(text_info, "Current Score: %d     Divers on board: %d", SCORE, sub.diversRescued);
-   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 10, 10, 0, text_info); 
+   	al_draw_text(size_32, al_map_rgb(0, 200, 0), 5, 5, 0, text_info); 
 	
 	drawLives(sub);
 	
@@ -256,14 +256,14 @@ void initDiver(Diver *diver) {
 
 	//Define o posicionamento horizontal inicial fora da tela
 	if(diver->dir_x > 0) {
-		diver->x = -100 - (rand() % 300);
+		diver->x = -50 - (rand() % 150);
 	} 
 	else {
-		diver->x = SCREEN_W + 100 + (rand() % 300);
+		diver->x = SCREEN_W + 50 + (rand() % 150);
 	}
 
 	//Sorteia a profundidade do diver
-	diver->y = SEA_LEVEL + 50 + (rand() % (int)(SCREEN_H - SEA_LEVEL - 100)); 
+	diver->y = SEA_LEVEL + 25 + (rand() % (int)(SCREEN_H - SEA_LEVEL - 50)); 
 }
 
 // @brief Desenha o submarino como um retangulo preenchido arredondado
@@ -295,14 +295,14 @@ void initFoe(Foe *foe) {
 
 	//Posicionamento horizontal inicial do torpedo inimigo fora da tela
 	if(foe->dir_x > 0) {
-		foe->x = -150 - (rand() % 200);
+		foe->x = -75 - (rand() % 100);
 	} 
 	else {
-		foe->x = SCREEN_W + 150 + (rand() % 200);
+		foe->x = SCREEN_W + 75 + (rand() % 100);
 	}
 
 	//Sorteia a pprofundidade inicial do torpedo inimigo
-	foe->y = SEA_LEVEL + 50 + (rand() % (int)(SCREEN_H - SEA_LEVEL - 100));
+	foe->y = SEA_LEVEL + 25 + (rand() % (int)(SCREEN_H - SEA_LEVEL - 50));
 
 	//Define a cor vermelha do torpedo inimigo
 	foe->color = al_map_rgb(255, 0, 0);
@@ -421,7 +421,7 @@ void updateSub(Sub *s) {
  */
 void drawDiver(Diver diver) {
 
-	al_draw_filled_circle(diver.x, diver.y, 20, diver.color);
+	al_draw_filled_circle(diver.x, diver.y, 10, diver.color);
 
 }
 
@@ -432,11 +432,11 @@ void updateDiver(Diver *diver) {
 
 	//Loop para reposicionar divers que sairem da tela à direita
 	if(diver->dir_x > 0 && diver->x > SCREEN_W) {
-		diver->x = -20;
+		diver->x = -10;
 	}
 	//Loop para reposicionar divers que sairem da tela à esquerda
 	if(diver->dir_x < 0 && diver->x < 0) {
-		diver->x = SCREEN_W + 20;
+		diver->x = SCREEN_W + 10;
 	}
 }
 
@@ -466,14 +466,14 @@ bool checkCollisionSubDiver(Sub s, Diver d) {
 	float distSquared= (distx * distx) + (disty * disty);
 
 	//Retorna verdadeiro ou falso caso a distância seja menor que o raio do diver de 20 pixels)
-	return sqrt(distSquared) < 20.0;
+	return sqrt(distSquared) < 10.0;
 }
 
 bool checkCollisionSubFoe(Sub sub, Foe foe) {
 
 	//Definição das medidas do submarino para a colisão entre o submarino e o torpedo inimigo
-	float subWidth = 160;
-	float subHeight = 40;
+	float subWidth = 80;
+	float subHeight = 20;
 
 	//Verifica se há sobreposição entre o submarino e o torpedo inimigo
 	if(sub.x < foe.x + FOE_WIDTH && sub.x + subWidth > foe.x &&
@@ -520,6 +520,8 @@ int main(int argc, char **argv){
 		fprintf(stderr, "failed to initialize allegro!\n");
 		return -1;
 	}
+
+	al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
 	
     // Inicializa o modulo de primitivas graficas da Allegro.
     if(!al_init_primitives_addon()){
@@ -568,7 +570,7 @@ int main(int argc, char **argv){
 	}
 	
 	// Carrega novamente uma fonte local de tamanho 32 para uso na tela final.
-    ALLEGRO_FONT *size_32 = al_load_font("arial.ttf", 32, 1);   
+    ALLEGRO_FONT *size_32 = al_load_font("arial.ttf", 16, 1);   
 	if(size_32 == NULL) {
 		fprintf(stderr, "font file does not exist or cannot be accessed!\n");
 	}
@@ -641,7 +643,7 @@ int main(int argc, char **argv){
 					sub.diversRescued++;
 					SCORE += 1;
 					printf("\nMergulhador resgatado! Pontos: %d", SCORE);
-					divers[i].x = -20;
+					divers[i].x = -10;
 					initDiver(&divers[i]);
 				}
 			}
